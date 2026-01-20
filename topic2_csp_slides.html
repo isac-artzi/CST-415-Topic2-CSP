@@ -178,6 +178,20 @@
             font-family: 'Courier New', monospace;
             margin: 20px 0;
             overflow-x: auto;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .algorithm pre {
+            margin: 0;
+            padding: 0;
+            font-family: inherit;
+            color: inherit;
+            background: transparent;
+            font-size: 1em;
+            line-height: inherit;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
         .chessboard {
@@ -370,8 +384,7 @@
             <h2>Backtracking Search Algorithm</h2>
             <p>The fundamental algorithm for solving CSPs</p>
 
-            <div class="algorithm">
-<strong>function</strong> BACKTRACKING-SEARCH(csp) <strong>returns</strong> solution or failure
+            <div class="algorithm"><pre><strong>function</strong> BACKTRACKING-SEARCH(csp) <strong>returns</strong> solution or failure
     <strong>return</strong> BACKTRACK({}, csp)
 
 <strong>function</strong> BACKTRACK(assignment, csp) <strong>returns</strong> solution or failure
@@ -387,7 +400,7 @@
                 result ← BACKTRACK(assignment, csp)
                 <strong>if</strong> result ≠ failure <strong>then return</strong> result
             remove {var = value} and inferences from assignment
-    <strong>return</strong> failure
+    <strong>return</strong> failure</pre>
             </div>
 
             <p><strong>Key Idea:</strong> Incrementally build assignments, backtrack when constraints are violated</p>
@@ -453,8 +466,7 @@
             <h2>Inference: Forward Checking</h2>
             <p>Keep track of remaining legal values for unassigned variables and eliminate inconsistent values</p>
 
-            <div class="algorithm">
-<strong>function</strong> FORWARD-CHECKING(csp, var, value) <strong>returns</strong> inferences or failure
+            <div class="algorithm"><pre><strong>function</strong> FORWARD-CHECKING(csp, var, value) <strong>returns</strong> inferences or failure
     inferences ← {}
     <strong>for each</strong> unassigned variable Y that is connected to var by constraint <strong>do</strong>
         <strong>for each</strong> value v in Domain(Y) <strong>do</strong>
@@ -462,7 +474,7 @@
                 remove v from Domain(Y)
                 add {Y ≠ v} to inferences
         <strong>if</strong> Domain(Y) is empty <strong>then return</strong> failure
-    <strong>return</strong> inferences
+    <strong>return</strong> inferences</pre>
             </div>
 
             <h3>Example:</h3>
@@ -487,8 +499,7 @@
                 <br>that satisfies the constraint between X and Y
             </div>
 
-            <div class="algorithm">
-<strong>function</strong> AC-3(csp) <strong>returns</strong> false if inconsistency found, true otherwise
+            <div class="algorithm"><pre><strong>function</strong> AC-3(csp) <strong>returns</strong> false if inconsistency found, true otherwise
     queue ← all arcs in csp
     <strong>while</strong> queue is not empty <strong>do</strong>
         (X, Y) ← REMOVE-FIRST(queue)
@@ -504,7 +515,7 @@
         <strong>if</strong> no value y in Domain(Y) satisfies constraint(X,Y) <strong>then</strong>
             delete x from Domain(X)
             revised ← true
-    <strong>return</strong> revised
+    <strong>return</strong> revised</pre>
             </div>
         </div>
 
