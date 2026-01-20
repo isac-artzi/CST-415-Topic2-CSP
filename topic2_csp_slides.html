@@ -196,21 +196,22 @@
 
         .chessboard {
             display: grid;
-            grid-template-columns: repeat(8, 50px);
-            grid-template-rows: repeat(8, 50px);
+            grid-template-columns: repeat(4, 60px);
+            grid-template-rows: repeat(4, 60px);
             gap: 0;
             margin: 20px auto;
-            border: 2px solid #333;
+            border: 3px solid #333;
             width: fit-content;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .chess-cell {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 30px;
+            font-size: 36px;
             cursor: pointer;
             transition: background 0.3s;
         }
@@ -255,12 +256,24 @@
             <h1>Topic 2: Constraint Satisfaction Problems (CSP)</h1>
             <p style="text-align: center; font-size: 1.5em; margin-top: 40px;">AI in Games and Simulations</p>
             <p style="text-align: center; font-size: 1.3em; color: #666; margin-top: 20px;">CST-415</p>
-            <div style="margin-top: 80px;">
+
+            <div style="margin-top: 60px; background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%); padding: 25px; border-radius: 15px;">
+                <h3 style="margin-top: 0;">What You'll Learn Today:</h3>
+                <p style="font-size: 1.1em;">How to solve complex puzzles and placement problems in games using a systematic AI approach. Think: placing enemies without overlap, generating valid Sudoku puzzles, or scheduling NPCs!</p>
+            </div>
+
+            <div style="margin-top: 40px;">
                 <h3>Learning Objectives:</h3>
                 <ul>
-                    <li>Design solutions to problems with multiple concurrent constraints</li>
-                    <li>Implement solutions using a least constraining value method</li>
-                    <li>Use objective functions as solution drivers</li>
+                    <li><strong>Design solutions</strong> to problems with multiple concurrent constraints
+                        <br><span style="font-size: 0.9em; color: #666;">→ Turn game rules into solvable mathematical problems</span>
+                    </li>
+                    <li><strong>Implement solutions</strong> using a least constraining value method
+                        <br><span style="font-size: 0.9em; color: #666;">→ Make smart choices that keep future options open</span>
+                    </li>
+                    <li><strong>Use objective functions</strong> as solution drivers
+                        <br><span style="font-size: 0.9em; color: #666;">→ Measure and optimize the quality of solutions</span>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -268,87 +281,120 @@
         <!-- Slide 2: What is a CSP? -->
         <div class="slide">
             <h2>What is a Constraint Satisfaction Problem?</h2>
-            <p>A <span class="highlight">Constraint Satisfaction Problem (CSP)</span> is a mathematical problem defined by:</p>
 
+            <p><strong>Simple Definition:</strong> A CSP is like solving a puzzle where you need to fill in blanks while following specific rules.</p>
+
+            <p style="margin-top: 20px;">Think of it like organizing a seating chart for a wedding: you have guests (variables), available seats (domains), and rules like "keep feuding relatives apart" (constraints). You need to assign every guest to a seat while respecting all the rules.</p>
+
+            <h3 style="margin-top: 30px;">The Three Components:</h3>
             <div class="grid">
                 <div class="card">
                     <h3>Variables</h3>
+                    <p><strong>What:</strong> The "blanks" to fill in</p>
                     <p>X = {X₁, X₂, ..., Xₙ}</p>
-                    <p>Set of variables we need to assign values to</p>
+                    <p><em>Example:</em> Each guest at the wedding, each queen on the chessboard, each region on a map</p>
                 </div>
                 <div class="card">
                     <h3>Domains</h3>
+                    <p><strong>What:</strong> The possible choices for each blank</p>
                     <p>D = {D₁, D₂, ..., Dₙ}</p>
-                    <p>Possible values for each variable</p>
+                    <p><em>Example:</em> Available seats, chess positions, colors</p>
                 </div>
                 <div class="card">
                     <h3>Constraints</h3>
+                    <p><strong>What:</strong> The rules that must be followed</p>
                     <p>C = {C₁, C₂, ..., Cₘ}</p>
-                    <p>Rules that limit combinations of values</p>
+                    <p><em>Example:</em> "Can't sit together," "can't attack," "can't be same color"</p>
                 </div>
             </div>
 
             <div class="math">
                 <strong>Goal:</strong> Find an assignment of values to variables that satisfies all constraints
                 <br><br>
-                <strong>Complete Assignment:</strong> Every variable has a value
+                <strong>Complete Assignment:</strong> Every variable has a value (all blanks filled)
                 <br>
-                <strong>Consistent Assignment:</strong> No constraints are violated
+                <strong>Consistent Assignment:</strong> No constraints are violated (all rules followed)
                 <br>
-                <strong>Solution:</strong> Complete + Consistent
+                <strong>Solution:</strong> Complete + Consistent (puzzle solved!)
             </div>
         </div>
 
         <!-- Slide 3: Game Example - Map Coloring -->
         <div class="slide">
             <h2>Classic Example: Map Coloring</h2>
+
+            <p><strong>Real-World Analogy:</strong> Imagine you're creating a board game with different territories. You want neighboring territories to have different colors so players can see the borders clearly.</p>
+
             <div class="game-example">
                 <h3>Problem:</h3>
-                <p>Color a map so that no two adjacent regions have the same color</p>
+                <p>Color a map of Australia so that no two adjacent regions share the same color</p>
 
-                <h3>CSP Formulation:</h3>
+                <h3>Breaking it Down:</h3>
                 <ul>
-                    <li><strong>Variables:</strong> Regions on the map (WA, NT, SA, Q, NSW, V, T)</li>
+                    <li><strong>What we're deciding:</strong> The color of each Australian state/territory</li>
+                    <li><strong>Available choices:</strong> Red, Green, or Blue for each region</li>
+                    <li><strong>Rules to follow:</strong> If two regions touch, they must be different colors</li>
+                </ul>
+
+                <h3 style="margin-top: 20px;">CSP Formulation:</h3>
+                <ul>
+                    <li><strong>Variables:</strong> WA, NT, SA, Q, NSW, V, T (7 regions)</li>
                     <li><strong>Domains:</strong> {Red, Green, Blue} for each region</li>
                     <li><strong>Constraints:</strong> Adjacent regions must have different colors</li>
                 </ul>
             </div>
 
             <div class="math">
-                Example Constraints:
-                <br>• WA ≠ NT
-                <br>• WA ≠ SA
-                <br>• NT ≠ SA
-                <br>• NT ≠ Q
-                <br>• ...
+                Example Constraints (in plain English and math):
+                <br>• "Western Australia can't be the same color as Northern Territory" → WA ≠ NT
+                <br>• "Western Australia can't be the same color as South Australia" → WA ≠ SA
+                <br>• "Northern Territory can't be the same color as South Australia" → NT ≠ SA
+                <br>• "Northern Territory can't be the same color as Queensland" → NT ≠ Q
+                <br>• ... (and so on for all touching regions)
             </div>
 
-            <p><strong>Why CSP?</strong> This is more efficient than searching through all 3⁷ = 2,187 possible color combinations!</p>
+            <p><strong>Why CSP?</strong> Without CSP, we'd try all 3⁷ = 2,187 possible combinations! CSP lets us eliminate bad choices early, often finding a solution after checking only 20-30 combinations.</p>
+
+            <p style="margin-top: 15px;"><em>Game Dev Connection:</em> Use this for territory coloring, team assignments, resource allocation across game zones.</p>
         </div>
 
         <!-- Slide 4: Game Context - N-Queens -->
         <div class="slide">
             <h2>Game Example: N-Queens Problem</h2>
+
+            <p><strong>Game Context:</strong> Think of this like placing powerful enemy units in a strategy game - you want them spread out so they don't interfere with each other's attack patterns.</p>
+
             <div class="game-example">
                 <h3>Problem:</h3>
                 <p>Place N queens on an N×N chessboard so that no two queens attack each other</p>
 
-                <h3>CSP Formulation:</h3>
+                <p style="margin-top: 15px;"><strong>Why is this tricky?</strong> Queens in chess can attack any piece in the same row, column, or diagonal. We need to place them so none can "see" each other.</p>
+
+                <h3 style="margin-top: 20px;">Smart Trick:</h3>
+                <p>Instead of asking "where should I place all queens?", we simplify to: "I'll put one queen in each row - now which column should each go in?"</p>
+
+                <h3 style="margin-top: 20px;">CSP Formulation:</h3>
                 <ul>
-                    <li><strong>Variables:</strong> Qᵢ = column position of queen in row i</li>
-                    <li><strong>Domains:</strong> {1, 2, 3, ..., N} for each queen</li>
+                    <li><strong>Variables:</strong> Q₁, Q₂, Q₃, Q₄ (which column for the queen in each row)</li>
+                    <li><strong>Domains:</strong> {1, 2, 3, 4} (columns available) for each queen</li>
                     <li><strong>Constraints:</strong>
                         <ul>
-                            <li>No two queens in same column: Qᵢ ≠ Qⱼ</li>
-                            <li>No two queens on same diagonal: |Qᵢ - Qⱼ| ≠ |i - j|</li>
+                            <li><strong>No same column:</strong> If Q₁ = 2, then Q₂, Q₃, Q₄ can't be 2</li>
+                            <li><strong>No diagonal attacks:</strong> If queens are on rows i and j, their columns can't differ by |i - j|</li>
                         </ul>
                     </li>
+                </ul>
+
+                <p style="margin-top: 15px;"><em>In Math Terms:</em></p>
+                <ul style="font-size: 0.95em;">
+                    <li>No two queens in same column: Qᵢ ≠ Qⱼ</li>
+                    <li>No two queens on same diagonal: |Qᵢ - Qⱼ| ≠ |i - j|</li>
                 </ul>
             </div>
 
             <div class="interactive-area">
                 <h3>Interactive Demo</h3>
-                <p>Click on cells to place queens (4-Queens problem)</p>
+                <p>Click on cells to place queens (4-Queens problem). Red cells = queens attacking each other!</p>
                 <div class="chessboard" id="chessboard"></div>
                 <button onclick="resetBoard()">Reset Board</button>
                 <p id="status-message"></p>
@@ -358,32 +404,59 @@
         <!-- Slide 5: Knights Problem from Syllabus -->
         <div class="slide">
             <h2>Lab Question: Knights on Chessboard</h2>
+
+            <p><strong>What Makes This Different from Queens?</strong> Knights have a unique L-shaped attack pattern (think of the "horse" piece in chess). They jump over pieces in an L-shape: 2 squares in one direction, then 1 square perpendicular.</p>
+
             <div class="game-example">
                 <h3>Problem:</h3>
                 <p>Place k knights on an n×n chessboard such that no two knights are attacking each other</p>
+
+                <p style="margin-top: 15px;"><strong>Key Difference:</strong> Unlike queens, we don't get a shortcut! Each knight can be on ANY square, so this is actually harder to solve.</p>
+
+                <h3 style="margin-top: 20px;">Breaking Down the Components:</h3>
+                <ul>
+                    <li><strong>What we're deciding:</strong> The exact position (row, column) for each knight</li>
+                    <li><strong>Available choices:</strong> Any of the n² squares on the board</li>
+                    <li><strong>Rules:</strong> No two knights on same square, and no L-shaped attacks</li>
+                </ul>
             </div>
 
             <h3>CSP Formulation:</h3>
             <div class="math">
-                <strong>Variables:</strong> K₁, K₂, ..., Kₖ (each knight's position)
+                <strong>Variables:</strong> K₁, K₂, ..., Kₖ (each knight's position on the board)
                 <br><br>
                 <strong>Domain:</strong> All squares on the n×n board
-                <br>D = {(i,j) | 1 ≤ i,j ≤ n}
+                <br>D = {(i,j) | 1 ≤ i,j ≤ n} — "Any row i and column j position"
                 <br><br>
                 <strong>Constraints:</strong> For any two knights Kᵢ and Kⱼ:
-                <br>• Kᵢ ≠ Kⱼ (different squares)
+                <br>• Kᵢ ≠ Kⱼ — "Can't be on the same square"
                 <br>• |xᵢ - xⱼ| + |yᵢ - yⱼ| ≠ 3 or |(xᵢ - xⱼ) × (yᵢ - yⱼ)| ≠ 2
-                <br>&nbsp;&nbsp;(not in L-shape attack pattern)
+                <br>&nbsp;&nbsp;— "Can't be in L-shaped attack pattern"
             </div>
 
-            <p><strong>Knight Attack Pattern:</strong> Knights attack in an L-shape: 2 squares in one direction, 1 square perpendicular</p>
+            <p><strong>Understanding the L-Shape:</strong> If Knight A is at (2,3), it attacks (1,1), (1,5), (3,1), (3,5), (4,2), (4,4), (0,2), (0,4). Notice each is exactly 2 away in one direction and 1 away in the other!</p>
+
+            <p style="margin-top: 15px;"><em>Game Application:</em> Enemy spawn points that shouldn't overlap attack zones, tower placement in tower defense games.</p>
         </div>
 
         <!-- Slide 6: Backtracking Algorithm -->
         <div class="slide">
             <h2>Backtracking Search Algorithm</h2>
-            <p>The fundamental algorithm for solving CSPs</p>
 
+            <p><strong>The Big Idea:</strong> Try to fill in values one at a time. If you hit a dead end (violate a constraint), undo your last choice and try something else. It's like solving a Sudoku puzzle!</p>
+
+            <h3>How It Works (Plain English):</h3>
+            <ol style="font-size: 1.1em; line-height: 1.8;">
+                <li><strong>Pick a variable</strong> that doesn't have a value yet (e.g., "Queen in row 2")</li>
+                <li><strong>Try a value</strong> from its domain (e.g., "put it in column 3")</li>
+                <li><strong>Check constraints</strong> - Does this break any rules?</li>
+                <li><strong>If OK:</strong> Move to the next variable and repeat</li>
+                <li><strong>If NOT OK:</strong> Try a different value</li>
+                <li><strong>If no values work:</strong> Go back to the previous variable and try a different value for it (this is the "backtracking")</li>
+                <li><strong>Success:</strong> When all variables have values and no rules are broken!</li>
+            </ol>
+
+            <h3 style="margin-top: 25px;">The Algorithm (Pseudocode):</h3>
             <div class="algorithm"><pre><strong>function</strong> BACKTRACKING-SEARCH(csp) <strong>returns</strong> solution or failure
     <strong>return</strong> BACKTRACK({}, csp)
 
@@ -403,69 +476,117 @@
     <strong>return</strong> failure</pre>
             </div>
 
-            <p><strong>Key Idea:</strong> Incrementally build assignments, backtrack when constraints are violated</p>
+            <p><strong>Why It's Called "Backtracking":</strong> When you hit a dead end, you "track back" to a previous choice and try a different path - just like exploring a maze!</p>
         </div>
 
         <!-- Slide 7: Heuristics - Variable Selection -->
         <div class="slide">
-            <h2>Heuristic 1: Most Constrained Variable</h2>
-            <p>Also called: <span class="highlight">Minimum Remaining Values (MRV)</span> or "fail-first"</p>
+            <h2>Heuristic 1: Most Constrained Variable (MRV)</h2>
+            <p>Also called: <span class="highlight">Minimum Remaining Values</span> or the <span class="highlight">"fail-first"</span> heuristic</p>
 
-            <div class="math">
-                <strong>Heuristic:</strong> Choose the variable with the fewest legal values remaining
+            <p><strong>The Question:</strong> When we have multiple empty variables to fill, which one should we tackle first?</p>
+
+            <p style="margin-top: 20px;"><strong>The Answer:</strong> Pick the one with the FEWEST legal options remaining!</p>
+
+            <h3>Why Does This Make Sense?</h3>
+            <p>Imagine you're packing a suitcase with different-sized items:</p>
+            <ul style="font-size: 1.05em;">
+                <li>If one item has only 2 spots it could fit, and another item has 10 possible spots...</li>
+                <li>Pack the constrained item first! If you can't fit it, you know immediately there's a problem</li>
+                <li>If you pack easy items first, you might pack the whole suitcase before discovering the hard item doesn't fit - wasted work!</li>
+            </ul>
+
+            <div class="math" style="margin-top: 25px;">
+                <strong>Mathematical Definition:</strong>
+                <br>MRV(X) = argmin |Domain(X)|
                 <br><br>
-                MRV(X) = argmin |Domain(X)|
+                <em>Translation:</em> Choose the variable X with the smallest domain (fewest remaining values)
             </div>
 
-            <h3>Why does this work?</h3>
+            <h3>Why This Works:</h3>
             <ul>
-                <li><strong>Fail-first:</strong> Detect failures early in the search tree</li>
-                <li><strong>Pruning:</strong> Reduce the branching factor</li>
-                <li><strong>Efficiency:</strong> Avoid wasting time on dead-end paths</li>
+                <li><strong>Fail-first:</strong> If there's a problem, we discover it quickly (before wasting time on easier variables)</li>
+                <li><strong>Pruning:</strong> Reduces the number of branches we explore</li>
+                <li><strong>Efficiency:</strong> We avoid spending time on paths that will eventually fail</li>
             </ul>
 
             <div class="game-example">
-                <h3>Example in Game:</h3>
-                <p>In Sudoku, choose the cell with the fewest possible numbers first</p>
-                <p>If a cell can only be 3 or 7, fill it before a cell that could be 1, 2, 3, 4, 5, 6, 7, 8, or 9</p>
+                <h3>Sudoku Example:</h3>
+                <p><strong>Cell A</strong> can only be 3 or 7 (2 choices)</p>
+                <p><strong>Cell B</strong> could be 1, 2, 3, 4, 5, 6, 7, 8, or 9 (9 choices)</p>
+                <p><strong>MRV says:</strong> Fill Cell A first! If neither 3 nor 7 works, you know immediately. If you fill Cell B first, you might try many combinations before discovering Cell A has no solution.</p>
             </div>
         </div>
 
         <!-- Slide 8: Heuristics - Value Selection -->
         <div class="slide">
-            <h2>Heuristic 2: Least Constraining Value</h2>
-            <p>Choose the value that rules out the fewest values in the remaining variables</p>
+            <h2>Heuristic 2: Least Constraining Value (LCV)</h2>
 
-            <div class="math">
-                <strong>Heuristic:</strong> Prefer the value that leaves the most flexibility for future assignments
+            <p><strong>The Question:</strong> Once we've picked a variable to fill (using MRV), which value from its domain should we try first?</p>
+
+            <p style="margin-top: 20px;"><strong>The Answer:</strong> Pick the value that limits OTHER variables the LEAST!</p>
+
+            <h3>Real-World Analogy:</h3>
+            <p>You're scheduling meetings in conference rooms:</p>
+            <ul style="font-size: 1.05em;">
+                <li>Meeting A could use Room 1 or Room 2</li>
+                <li>Meetings B, C, D can ONLY use Room 1</li>
+                <li><strong>Smart choice:</strong> Put Meeting A in Room 2! This keeps Room 1 free for B, C, D</li>
+                <li><strong>Bad choice:</strong> Put Meeting A in Room 1 - now B, C, D have no options!</li>
+            </ul>
+
+            <div class="math" style="margin-top: 25px;">
+                <strong>Mathematical Definition:</strong>
+                <br>LCV(v) = argmin Σ (constraints eliminated by assigning v)
                 <br><br>
-                LCV(v) = argmin Σ (constraints eliminated by assigning v)
+                <em>Translation:</em> Choose value v that removes the fewest options from other variables' domains
             </div>
 
-            <h3>Why Most Constrained Variable + Least Constraining Value?</h3>
+            <h3>Combining MRV + LCV:</h3>
             <div class="grid">
                 <div class="card">
-                    <h3>Variable Selection</h3>
+                    <h3>Variable Selection (MRV)</h3>
                     <p><strong>Most Constrained</strong></p>
-                    <p>Fail fast - detect problems early</p>
+                    <p>"Tackle the hardest problem first"</p>
+                    <p>✓ Fail fast - detect problems early</p>
                 </div>
                 <div class="card">
-                    <h3>Value Selection</h3>
+                    <h3>Value Selection (LCV)</h3>
                     <p><strong>Least Constraining</strong></p>
-                    <p>Succeed quickly - preserve options</p>
+                    <p>"Choose the most flexible option"</p>
+                    <p>✓ Succeed quickly - preserve future options</p>
                 </div>
             </div>
 
-            <p class="highlight" style="display: block; margin-top: 30px; padding: 20px;">
-                Strategy: Choose the hardest variable first, but give it the easiest value
+            <p class="highlight" style="display: block; margin-top: 30px; padding: 20px; font-size: 1.2em;">
+                <strong>Strategy:</strong> Pick the hardest variable first (MRV), but give it the easiest value (LCV)
+                <br><br>
+                <em>Think:</em> "Deal with difficult problems early, but handle them gently to keep future options open"
             </p>
         </div>
 
         <!-- Slide 9: Forward Checking -->
         <div class="slide">
             <h2>Inference: Forward Checking</h2>
-            <p>Keep track of remaining legal values for unassigned variables and eliminate inconsistent values</p>
 
+            <p><strong>The Idea:</strong> After making a choice, immediately update what's still possible for related variables. Don't wait to discover conflicts later!</p>
+
+            <h3>Analogy: Planning a Road Trip</h3>
+            <p>Imagine planning a route with multiple stops:</p>
+            <ul style="font-size: 1.05em;">
+                <li><strong>Without Forward Checking:</strong> "Let's visit City A at 2pm" → Later: "Oh no, we can't reach City B by 3pm from there!"</li>
+                <li><strong>With Forward Checking:</strong> "If we visit City A at 2pm, then City B must be at 4pm or later (3pm is now impossible)" → Update immediately!</li>
+            </ul>
+
+            <h3 style="margin-top: 25px;">How It Works:</h3>
+            <ol style="font-size: 1.05em; line-height: 1.8;">
+                <li>Make an assignment (e.g., "Queen 1 goes in column 3")</li>
+                <li>Look at all unassigned variables connected by constraints</li>
+                <li>Remove values from their domains that would violate constraints</li>
+                <li>If any variable ends up with NO valid values → we know this path fails!</li>
+            </ol>
+
+            <h3 style="margin-top: 25px;">The Algorithm:</h3>
             <div class="algorithm"><pre><strong>function</strong> FORWARD-CHECKING(csp, var, value) <strong>returns</strong> inferences or failure
     inferences ← {}
     <strong>for each</strong> unassigned variable Y that is connected to var by constraint <strong>do</strong>
@@ -477,27 +598,50 @@
     <strong>return</strong> inferences</pre>
             </div>
 
-            <h3>Example:</h3>
+            <h3>Example: Map Coloring</h3>
             <div class="math">
-                WA = red
-                <br>↓ Forward Checking
-                <br>NT ∈ {green, blue} (remove red)
-                <br>SA ∈ {green, blue} (remove red)
+                <strong>Step 1:</strong> Assign WA = red
+                <br><br>
+                <strong>Step 2:</strong> Forward Checking updates neighbors:
+                <br>• NT was {red, green, blue} → now {green, blue} (remove red)
+                <br>• SA was {red, green, blue} → now {green, blue} (remove red)
+                <br><br>
+                <strong>Result:</strong> We immediately know NT and SA can't be red, saving us from trying those bad options later!
             </div>
+
+            <p style="margin-top: 20px;"><strong>Benefit:</strong> Catch dead ends earlier, before wasting time exploring impossible paths.</p>
         </div>
 
         <!-- Slide 10: Arc Consistency -->
         <div class="slide">
             <h2>Arc Consistency (AC-3 Algorithm)</h2>
-            <p>A stronger form of constraint propagation</p>
 
-            <h3>Definition:</h3>
-            <div class="math">
-                Arc (X, Y) is consistent if:
-                <br>For every value x in Domain(X),
-                <br>there exists some value y in Domain(Y)
-                <br>that satisfies the constraint between X and Y
+            <p><strong>The Big Idea:</strong> Forward Checking only looks one step ahead. Arc Consistency looks further, propagating constraints through the entire network!</p>
+
+            <h3>What's an "Arc"?</h3>
+            <p>Think of an arc as a one-way relationship between two variables: "X depends on Y"</p>
+            <ul style="font-size: 1.05em;">
+                <li><strong>Arc Consistency:</strong> Every value in X's domain has at least one compatible value in Y's domain</li>
+                <li><strong>Analogy:</strong> Like a dating app - you only keep options where there's mutual compatibility!</li>
+            </ul>
+
+            <h3 style="margin-top: 25px;">Plain English Definition:</h3>
+            <p style="font-size: 1.05em; background: #fff3cd; padding: 15px; border-radius: 8px;">
+                Arc (X → Y) is consistent if: For EVERY value that X could be, there's at least ONE value that Y could be that doesn't violate the constraint.
+            </p>
+
+            <p style="margin-top: 15px;"><strong>If not:</strong> Remove values from X's domain that have no compatible partner in Y!</p>
+
+            <div class="math" style="margin-top: 20px;">
+                <strong>Mathematical Definition:</strong>
+                <br>Arc (X, Y) is consistent if:
+                <br>∀x ∈ Domain(X), ∃y ∈ Domain(Y) such that constraint(X=x, Y=y) is satisfied
+                <br><br>
+                <em>Translation:</em> For all x in X's domain, there exists some y in Y's domain that works together
             </div>
+
+            <h3 style="margin-top: 25px;">The AC-3 Algorithm:</h3>
+            <p><strong>Strategy:</strong> Keep revising domains until nothing changes anymore (we've found all the incompatibilities)</p>
 
             <div class="algorithm"><pre><strong>function</strong> AC-3(csp) <strong>returns</strong> false if inconsistency found, true otherwise
     queue ← all arcs in csp
@@ -517,58 +661,79 @@
             revised ← true
     <strong>return</strong> revised</pre>
             </div>
+
+            <p style="margin-top: 20px;"><strong>Power:</strong> Often solves easy CSPs without any search! For hard CSPs, it dramatically reduces the domains before we start backtracking.</p>
         </div>
 
         <!-- Slide 11: Game Applications -->
         <div class="slide">
             <h2>CSP in Game Development</h2>
 
+            <p><strong>Why CSP for Games?</strong> Games are FULL of situations where you need to place/assign things while respecting multiple rules. CSP gives you a systematic way to handle this!</p>
+
             <div class="grid">
                 <div class="card">
                     <h3>Level Generation</h3>
+                    <p><strong>Use Case:</strong> Procedural dungeons</p>
                     <ul>
-                        <li>Room placement</li>
-                        <li>Resource distribution</li>
-                        <li>Enemy positioning</li>
+                        <li>Room placement (don't overlap!)</li>
+                        <li>Resource distribution (balanced!)</li>
+                        <li>Enemy positioning (fair challenge!)</li>
                     </ul>
+                    <p style="margin-top: 10px; font-size: 0.9em;"><em>Games:</em> Binding of Isaac, Enter the Gungeon</p>
                 </div>
                 <div class="card">
                     <h3>Puzzle Games</h3>
+                    <p><strong>Use Case:</strong> Generate or solve puzzles</p>
                     <ul>
-                        <li>Sudoku solvers</li>
-                        <li>Logic puzzles</li>
-                        <li>Pattern matching</li>
+                        <li>Sudoku solvers/generators</li>
+                        <li>Logic puzzle validation</li>
+                        <li>Pattern matching games</li>
                     </ul>
+                    <p style="margin-top: 10px; font-size: 0.9em;"><em>Games:</em> Sudoku, Picross, Flow</p>
                 </div>
                 <div class="card">
                     <h3>Character Scheduling</h3>
+                    <p><strong>Use Case:</strong> NPC routines & quests</p>
                     <ul>
-                        <li>NPC behavior</li>
+                        <li>NPC daily schedules</li>
                         <li>Quest dependencies</li>
                         <li>Resource allocation</li>
                     </ul>
+                    <p style="margin-top: 10px; font-size: 0.9em;"><em>Games:</em> Stardew Valley, Skyrim</p>
                 </div>
                 <div class="card">
-                    <h3>Animation</h3>
+                    <h3>Animation & Physics</h3>
+                    <p><strong>Use Case:</strong> Realistic movement</p>
                     <ul>
-                        <li>Inverse kinematics</li>
+                        <li>Inverse kinematics (IK)</li>
                         <li>Motion planning</li>
                         <li>Collision avoidance</li>
                     </ul>
+                    <p style="margin-top: 10px; font-size: 0.9em;"><em>Example:</em> Character feet on terrain</p>
                 </div>
             </div>
 
-            <div class="game-example">
-                <h3>Example: Dungeon Room Placement</h3>
-                <p><strong>Variables:</strong> Each room R₁, R₂, ..., Rₙ</p>
-                <p><strong>Domains:</strong> Grid positions (x, y)</p>
-                <p><strong>Constraints:</strong></p>
-                <ul>
-                    <li>Rooms must not overlap</li>
-                    <li>Rooms must be connected by paths</li>
-                    <li>Boss room must be furthest from start</li>
-                    <li>Treasure rooms must be in dead ends</li>
+            <div class="game-example" style="margin-top: 30px;">
+                <h3>Detailed Example: Dungeon Room Placement</h3>
+                <p><strong>Problem:</strong> Generate a dungeon with 10 rooms that feels balanced and fun</p>
+
+                <p style="margin-top: 15px;"><strong>CSP Setup:</strong></p>
+                <ul style="font-size: 1.05em;">
+                    <li><strong>Variables:</strong> R₁ (start), R₂...R₉ (normal), R₁₀ (boss)</li>
+                    <li><strong>Domains:</strong> Grid positions (x, y) on a 20×20 grid</li>
+                    <li><strong>Constraints:</strong>
+                        <ul style="margin-top: 10px;">
+                            <li>Rooms must not overlap (no two rooms at same position)</li>
+                            <li>Rooms must be reachable (connected by corridors)</li>
+                            <li>Boss room must be far from start (distance ≥ 15)</li>
+                            <li>Treasure rooms must be in dead ends (only 1 connection)</li>
+                            <li>Minimum spacing between rooms (for corridors)</li>
+                        </ul>
+                    </li>
                 </ul>
+
+                <p style="margin-top: 20px;"><strong>Result:</strong> CSP ensures every generated dungeon is playable and interesting, without manual design!</p>
             </div>
         </div>
 
@@ -576,33 +741,66 @@
         <div class="slide">
             <h2>Summary & Key Takeaways</h2>
 
-            <h3>Core Concepts:</h3>
-            <ul>
-                <li><strong>CSP Components:</strong> Variables, Domains, Constraints</li>
-                <li><strong>Backtracking:</strong> Systematic search with backtracking</li>
-                <li><strong>Heuristics:</strong> Most constrained variable + Least constraining value</li>
-                <li><strong>Inference:</strong> Forward checking and arc consistency (AC-3)</li>
-            </ul>
+            <h3>The Big Picture:</h3>
+            <p style="font-size: 1.15em; background: #e7f3ff; padding: 20px; border-radius: 10px; border-left: 5px solid #667eea;">
+                CSP is about <strong>systematically solving puzzles with rules</strong>. Instead of trying every possibility, we use smart strategies to find solutions efficiently.
+            </p>
 
-            <div class="math">
-                <strong>Time Complexity:</strong>
-                <br>Worst case: O(d^n) where d = domain size, n = number of variables
-                <br>With heuristics and inference: Often dramatically better in practice
+            <h3 style="margin-top: 30px;">What We Learned:</h3>
+
+            <div class="grid">
+                <div class="card">
+                    <h3>1. CSP Basics</h3>
+                    <p><strong>Variables:</strong> What to decide</p>
+                    <p><strong>Domains:</strong> Possible choices</p>
+                    <p><strong>Constraints:</strong> Rules to follow</p>
+                </div>
+                <div class="card">
+                    <h3>2. Backtracking</h3>
+                    <p>Try values one at a time</p>
+                    <p>If stuck, undo and try different path</p>
+                    <p>Like solving a maze!</p>
+                </div>
+                <div class="card">
+                    <h3>3. Smart Ordering</h3>
+                    <p><strong>MRV:</strong> Tackle hard problems first</p>
+                    <p><strong>LCV:</strong> Keep options open</p>
+                    <p>Work smart, not hard!</p>
+                </div>
+                <div class="card">
+                    <h3>4. Look Ahead</h3>
+                    <p><strong>Forward Checking:</strong> Update immediately</p>
+                    <p><strong>AC-3:</strong> Propagate everywhere</p>
+                    <p>Catch problems early!</p>
+                </div>
             </div>
 
-            <h3>For Your Project:</h3>
-            <ol>
-                <li>Identify the CSP in your game/simulation</li>
-                <li>Formulate variables, domains, and constraints clearly</li>
-                <li>Implement backtracking with MRV and LCV heuristics</li>
-                <li>Use forward checking or AC-3 for efficiency</li>
-                <li>Test with objective functions to measure solution quality</li>
+            <div class="math" style="margin-top: 30px;">
+                <strong>Performance:</strong>
+                <br>Worst case: O(d^n) — try all d^n combinations
+                <br>With heuristics: Often dramatically better (exponential → polynomial)
+                <br><br>
+                <strong>Example:</strong> 10 variables, 10 values each
+                <br>Brute force: 10^10 = 10 billion combinations
+                <br>With CSP techniques: Often just thousands!
+            </div>
+
+            <h3 style="margin-top: 30px;">Your Implementation Checklist:</h3>
+            <ol style="font-size: 1.1em; line-height: 1.9;">
+                <li><strong>Identify the CSP:</strong> What are you assigning? What are the rules?</li>
+                <li><strong>Formulate clearly:</strong> Write down variables, domains, constraints</li>
+                <li><strong>Implement backtracking:</strong> Basic search algorithm</li>
+                <li><strong>Add MRV heuristic:</strong> Choose hardest variable first</li>
+                <li><strong>Add LCV heuristic:</strong> Choose most flexible value</li>
+                <li><strong>Add inference:</strong> Forward checking or AC-3</li>
+                <li><strong>Test & measure:</strong> Count backtracks, time to solution</li>
             </ol>
 
-            <div class="interactive-area">
-                <h3>Next Steps</h3>
-                <p>Ready to implement CSP in your game?</p>
-                <p>Try the in-class activity: Treasure Room Placement</p>
+            <div class="interactive-area" style="margin-top: 30px;">
+                <h3>Ready to Code?</h3>
+                <p style="font-size: 1.15em;">Try the in-class activity: <strong>Treasure Room Placement</strong></p>
+                <p>You'll implement backtracking, MRV, and see CSP in action!</p>
+                <p style="margin-top: 15px; color: #667eea; font-weight: bold;">This prepares you for Project 2: Least Constraining Value Heuristic</p>
             </div>
         </div>
     </div>
