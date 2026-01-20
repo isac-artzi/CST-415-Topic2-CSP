@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 2: Constraint Satisfaction Problems (CSP)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .slide {
+            display: none;
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 60px;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #764ba2;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        p, li {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        ul {
+            margin-left: 40px;
+        }
+
+        .math {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .interactive-area {
+            background: #e7f3ff;
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+
+        .nav-buttons {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 20px;
+            right: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateX(10px);
+        }
+
+        .algorithm {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+            gap: 0;
+            margin: 20px auto;
+            border: 2px solid #333;
+            width: fit-content;
+        }
+
+        .chess-cell {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .chess-cell.white {
+            background: #f0d9b5;
+        }
+
+        .chess-cell.black {
+            background: #b58863;
+        }
+
+        .chess-cell.attacked {
+            background: rgba(255, 0, 0, 0.3);
+        }
+
+        .chess-cell:hover {
+            opacity: 0.7;
+        }
+
+        .game-example {
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-number">Slide <span id="current-slide">1</span> / <span id="total-slides">12</span></div>
+
+    <div class="slide-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <h1>Topic 2: Constraint Satisfaction Problems (CSP)</h1>
+            <p style="text-align: center; font-size: 1.5em; margin-top: 40px;">AI in Games and Simulations</p>
+            <p style="text-align: center; font-size: 1.3em; color: #666; margin-top: 20px;">CST-415</p>
+            <div style="margin-top: 80px;">
+                <h3>Learning Objectives:</h3>
+                <ul>
+                    <li>Design solutions to problems with multiple concurrent constraints</li>
+                    <li>Implement solutions using a least constraining value method</li>
+                    <li>Use objective functions as solution drivers</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 2: What is a CSP? -->
+        <div class="slide">
+            <h2>What is a Constraint Satisfaction Problem?</h2>
+            <p>A <span class="highlight">Constraint Satisfaction Problem (CSP)</span> is a mathematical problem defined by:</p>
+
+            <div class="grid">
+                <div class="card">
+                    <h3>Variables</h3>
+                    <p>X = {X₁, X₂, ..., Xₙ}</p>
+                    <p>Set of variables we need to assign values to</p>
+                </div>
+                <div class="card">
+                    <h3>Domains</h3>
+                    <p>D = {D₁, D₂, ..., Dₙ}</p>
+                    <p>Possible values for each variable</p>
+                </div>
+                <div class="card">
+                    <h3>Constraints</h3>
+                    <p>C = {C₁, C₂, ..., Cₘ}</p>
+                    <p>Rules that limit combinations of values</p>
+                </div>
+            </div>
+
+            <div class="math">
+                <strong>Goal:</strong> Find an assignment of values to variables that satisfies all constraints
+                <br><br>
+                <strong>Complete Assignment:</strong> Every variable has a value
+                <br>
+                <strong>Consistent Assignment:</strong> No constraints are violated
+                <br>
+                <strong>Solution:</strong> Complete + Consistent
+            </div>
+        </div>
+
+        <!-- Slide 3: Game Example - Map Coloring -->
+        <div class="slide">
+            <h2>Classic Example: Map Coloring</h2>
+            <div class="game-example">
+                <h3>Problem:</h3>
+                <p>Color a map so that no two adjacent regions have the same color</p>
+
+                <h3>CSP Formulation:</h3>
+                <ul>
+                    <li><strong>Variables:</strong> Regions on the map (WA, NT, SA, Q, NSW, V, T)</li>
+                    <li><strong>Domains:</strong> {Red, Green, Blue} for each region</li>
+                    <li><strong>Constraints:</strong> Adjacent regions must have different colors</li>
+                </ul>
+            </div>
+
+            <div class="math">
+                Example Constraints:
+                <br>• WA ≠ NT
+                <br>• WA ≠ SA
+                <br>• NT ≠ SA
+                <br>• NT ≠ Q
+                <br>• ...
+            </div>
+
+            <p><strong>Why CSP?</strong> This is more efficient than searching through all 3⁷ = 2,187 possible color combinations!</p>
+        </div>
+
+        <!-- Slide 4: Game Context - N-Queens -->
+        <div class="slide">
+            <h2>Game Example: N-Queens Problem</h2>
+            <div class="game-example">
+                <h3>Problem:</h3>
+                <p>Place N queens on an N×N chessboard so that no two queens attack each other</p>
+
+                <h3>CSP Formulation:</h3>
+                <ul>
+                    <li><strong>Variables:</strong> Qᵢ = column position of queen in row i</li>
+                    <li><strong>Domains:</strong> {1, 2, 3, ..., N} for each queen</li>
+                    <li><strong>Constraints:</strong>
+                        <ul>
+                            <li>No two queens in same column: Qᵢ ≠ Qⱼ</li>
+                            <li>No two queens on same diagonal: |Qᵢ - Qⱼ| ≠ |i - j|</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="interactive-area">
+                <h3>Interactive Demo</h3>
+                <p>Click on cells to place queens (4-Queens problem)</p>
+                <div class="chessboard" id="chessboard"></div>
+                <button onclick="resetBoard()">Reset Board</button>
+                <p id="status-message"></p>
+            </div>
+        </div>
+
+        <!-- Slide 5: Knights Problem from Syllabus -->
+        <div class="slide">
+            <h2>Lab Question: Knights on Chessboard</h2>
+            <div class="game-example">
+                <h3>Problem:</h3>
+                <p>Place k knights on an n×n chessboard such that no two knights are attacking each other</p>
+            </div>
+
+            <h3>CSP Formulation:</h3>
+            <div class="math">
+                <strong>Variables:</strong> K₁, K₂, ..., Kₖ (each knight's position)
+                <br><br>
+                <strong>Domain:</strong> All squares on the n×n board
+                <br>D = {(i,j) | 1 ≤ i,j ≤ n}
+                <br><br>
+                <strong>Constraints:</strong> For any two knights Kᵢ and Kⱼ:
+                <br>• Kᵢ ≠ Kⱼ (different squares)
+                <br>• |xᵢ - xⱼ| + |yᵢ - yⱼ| ≠ 3 or |(xᵢ - xⱼ) × (yᵢ - yⱼ)| ≠ 2
+                <br>&nbsp;&nbsp;(not in L-shape attack pattern)
+            </div>
+
+            <p><strong>Knight Attack Pattern:</strong> Knights attack in an L-shape: 2 squares in one direction, 1 square perpendicular</p>
+        </div>
+
+        <!-- Slide 6: Backtracking Algorithm -->
+        <div class="slide">
+            <h2>Backtracking Search Algorithm</h2>
+            <p>The fundamental algorithm for solving CSPs</p>
+
+            <div class="algorithm">
+<strong>function</strong> BACKTRACKING-SEARCH(csp) <strong>returns</strong> solution or failure
+    <strong>return</strong> BACKTRACK({}, csp)
+
+<strong>function</strong> BACKTRACK(assignment, csp) <strong>returns</strong> solution or failure
+    <strong>if</strong> assignment is complete <strong>then return</strong> assignment
+
+    var ← SELECT-UNASSIGNED-VARIABLE(csp)
+    <strong>for each</strong> value <strong>in</strong> ORDER-DOMAIN-VALUES(var, assignment, csp) <strong>do</strong>
+        <strong>if</strong> value is consistent with assignment <strong>then</strong>
+            add {var = value} to assignment
+            inferences ← INFERENCE(csp, var, value)
+            <strong>if</strong> inferences ≠ failure <strong>then</strong>
+                add inferences to assignment
+                result ← BACKTRACK(assignment, csp)
+                <strong>if</strong> result ≠ failure <strong>then return</strong> result
+            remove {var = value} and inferences from assignment
+    <strong>return</strong> failure
+            </div>
+
+            <p><strong>Key Idea:</strong> Incrementally build assignments, backtrack when constraints are violated</p>
+        </div>
+
+        <!-- Slide 7: Heuristics - Variable Selection -->
+        <div class="slide">
+            <h2>Heuristic 1: Most Constrained Variable</h2>
+            <p>Also called: <span class="highlight">Minimum Remaining Values (MRV)</span> or "fail-first"</p>
+
+            <div class="math">
+                <strong>Heuristic:</strong> Choose the variable with the fewest legal values remaining
+                <br><br>
+                MRV(X) = argmin |Domain(X)|
+            </div>
+
+            <h3>Why does this work?</h3>
+            <ul>
+                <li><strong>Fail-first:</strong> Detect failures early in the search tree</li>
+                <li><strong>Pruning:</strong> Reduce the branching factor</li>
+                <li><strong>Efficiency:</strong> Avoid wasting time on dead-end paths</li>
+            </ul>
+
+            <div class="game-example">
+                <h3>Example in Game:</h3>
+                <p>In Sudoku, choose the cell with the fewest possible numbers first</p>
+                <p>If a cell can only be 3 or 7, fill it before a cell that could be 1, 2, 3, 4, 5, 6, 7, 8, or 9</p>
+            </div>
+        </div>
+
+        <!-- Slide 8: Heuristics - Value Selection -->
+        <div class="slide">
+            <h2>Heuristic 2: Least Constraining Value</h2>
+            <p>Choose the value that rules out the fewest values in the remaining variables</p>
+
+            <div class="math">
+                <strong>Heuristic:</strong> Prefer the value that leaves the most flexibility for future assignments
+                <br><br>
+                LCV(v) = argmin Σ (constraints eliminated by assigning v)
+            </div>
+
+            <h3>Why Most Constrained Variable + Least Constraining Value?</h3>
+            <div class="grid">
+                <div class="card">
+                    <h3>Variable Selection</h3>
+                    <p><strong>Most Constrained</strong></p>
+                    <p>Fail fast - detect problems early</p>
+                </div>
+                <div class="card">
+                    <h3>Value Selection</h3>
+                    <p><strong>Least Constraining</strong></p>
+                    <p>Succeed quickly - preserve options</p>
+                </div>
+            </div>
+
+            <p class="highlight" style="display: block; margin-top: 30px; padding: 20px;">
+                Strategy: Choose the hardest variable first, but give it the easiest value
+            </p>
+        </div>
+
+        <!-- Slide 9: Forward Checking -->
+        <div class="slide">
+            <h2>Inference: Forward Checking</h2>
+            <p>Keep track of remaining legal values for unassigned variables and eliminate inconsistent values</p>
+
+            <div class="algorithm">
+<strong>function</strong> FORWARD-CHECKING(csp, var, value) <strong>returns</strong> inferences or failure
+    inferences ← {}
+    <strong>for each</strong> unassigned variable Y that is connected to var by constraint <strong>do</strong>
+        <strong>for each</strong> value v in Domain(Y) <strong>do</strong>
+            <strong>if</strong> v conflicts with value assigned to var <strong>then</strong>
+                remove v from Domain(Y)
+                add {Y ≠ v} to inferences
+        <strong>if</strong> Domain(Y) is empty <strong>then return</strong> failure
+    <strong>return</strong> inferences
+            </div>
+
+            <h3>Example:</h3>
+            <div class="math">
+                WA = red
+                <br>↓ Forward Checking
+                <br>NT ∈ {green, blue} (remove red)
+                <br>SA ∈ {green, blue} (remove red)
+            </div>
+        </div>
+
+        <!-- Slide 10: Arc Consistency -->
+        <div class="slide">
+            <h2>Arc Consistency (AC-3 Algorithm)</h2>
+            <p>A stronger form of constraint propagation</p>
+
+            <h3>Definition:</h3>
+            <div class="math">
+                Arc (X, Y) is consistent if:
+                <br>For every value x in Domain(X),
+                <br>there exists some value y in Domain(Y)
+                <br>that satisfies the constraint between X and Y
+            </div>
+
+            <div class="algorithm">
+<strong>function</strong> AC-3(csp) <strong>returns</strong> false if inconsistency found, true otherwise
+    queue ← all arcs in csp
+    <strong>while</strong> queue is not empty <strong>do</strong>
+        (X, Y) ← REMOVE-FIRST(queue)
+        <strong>if</strong> REVISE(csp, X, Y) <strong>then</strong>
+            <strong>if</strong> size of Domain(X) = 0 <strong>then return</strong> false
+            <strong>for each</strong> Z in neighbors(X) except Y <strong>do</strong>
+                add (Z, X) to queue
+    <strong>return</strong> true
+
+<strong>function</strong> REVISE(csp, X, Y) <strong>returns</strong> true iff Domain(X) was revised
+    revised ← false
+    <strong>for each</strong> x in Domain(X) <strong>do</strong>
+        <strong>if</strong> no value y in Domain(Y) satisfies constraint(X,Y) <strong>then</strong>
+            delete x from Domain(X)
+            revised ← true
+    <strong>return</strong> revised
+            </div>
+        </div>
+
+        <!-- Slide 11: Game Applications -->
+        <div class="slide">
+            <h2>CSP in Game Development</h2>
+
+            <div class="grid">
+                <div class="card">
+                    <h3>Level Generation</h3>
+                    <ul>
+                        <li>Room placement</li>
+                        <li>Resource distribution</li>
+                        <li>Enemy positioning</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Puzzle Games</h3>
+                    <ul>
+                        <li>Sudoku solvers</li>
+                        <li>Logic puzzles</li>
+                        <li>Pattern matching</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Character Scheduling</h3>
+                    <ul>
+                        <li>NPC behavior</li>
+                        <li>Quest dependencies</li>
+                        <li>Resource allocation</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Animation</h3>
+                    <ul>
+                        <li>Inverse kinematics</li>
+                        <li>Motion planning</li>
+                        <li>Collision avoidance</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="game-example">
+                <h3>Example: Dungeon Room Placement</h3>
+                <p><strong>Variables:</strong> Each room R₁, R₂, ..., Rₙ</p>
+                <p><strong>Domains:</strong> Grid positions (x, y)</p>
+                <p><strong>Constraints:</strong></p>
+                <ul>
+                    <li>Rooms must not overlap</li>
+                    <li>Rooms must be connected by paths</li>
+                    <li>Boss room must be furthest from start</li>
+                    <li>Treasure rooms must be in dead ends</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 12: Summary & Practice -->
+        <div class="slide">
+            <h2>Summary & Key Takeaways</h2>
+
+            <h3>Core Concepts:</h3>
+            <ul>
+                <li><strong>CSP Components:</strong> Variables, Domains, Constraints</li>
+                <li><strong>Backtracking:</strong> Systematic search with backtracking</li>
+                <li><strong>Heuristics:</strong> Most constrained variable + Least constraining value</li>
+                <li><strong>Inference:</strong> Forward checking and arc consistency (AC-3)</li>
+            </ul>
+
+            <div class="math">
+                <strong>Time Complexity:</strong>
+                <br>Worst case: O(d^n) where d = domain size, n = number of variables
+                <br>With heuristics and inference: Often dramatically better in practice
+            </div>
+
+            <h3>For Your Project:</h3>
+            <ol>
+                <li>Identify the CSP in your game/simulation</li>
+                <li>Formulate variables, domains, and constraints clearly</li>
+                <li>Implement backtracking with MRV and LCV heuristics</li>
+                <li>Use forward checking or AC-3 for efficiency</li>
+                <li>Test with objective functions to measure solution quality</li>
+            </ol>
+
+            <div class="interactive-area">
+                <h3>Next Steps</h3>
+                <p>Ready to implement CSP in your game?</p>
+                <p>Try the in-class activity: Treasure Room Placement</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button onclick="previousSlide()">← Previous</button>
+        <button onclick="nextSlide()">Next →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        document.getElementById('total-slides').textContent = totalSlides;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            document.getElementById('current-slide').textContent = currentSlide + 1;
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') previousSlide();
+        });
+
+        // Chessboard for 4-Queens demo
+        const chessboard = document.getElementById('chessboard');
+        const queens = [];
+
+        function createChessboard() {
+            if (!chessboard) return;
+
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 4; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'chess-cell ' + ((row + col) % 2 === 0 ? 'white' : 'black');
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    cell.onclick = () => toggleQueen(row, col);
+                    chessboard.appendChild(cell);
+                }
+            }
+        }
+
+        function toggleQueen(row, col) {
+            const cells = Array.from(chessboard.children);
+            const cellIndex = row * 4 + col;
+            const cell = cells[cellIndex];
+
+            const queenIndex = queens.findIndex(q => q.row === row && q.col === col);
+
+            if (queenIndex >= 0) {
+                queens.splice(queenIndex, 1);
+                cell.textContent = '';
+            } else {
+                if (queens.length < 4) {
+                    queens.push({row, col});
+                    cell.textContent = '♕';
+                }
+            }
+
+            updateBoard();
+            checkSolution();
+        }
+
+        function updateBoard() {
+            const cells = Array.from(chessboard.children);
+            cells.forEach(cell => cell.classList.remove('attacked'));
+
+            queens.forEach(q1 => {
+                queens.forEach(q2 => {
+                    if (q1 !== q2) {
+                        if (q1.row === q2.row || q1.col === q2.col ||
+                            Math.abs(q1.row - q2.row) === Math.abs(q1.col - q2.col)) {
+                            const index1 = q1.row * 4 + q1.col;
+                            cells[index1].classList.add('attacked');
+                        }
+                    }
+                });
+            });
+        }
+
+        function checkSolution() {
+            const statusMsg = document.getElementById('status-message');
+
+            if (queens.length === 0) {
+                statusMsg.textContent = '';
+                return;
+            }
+
+            let valid = true;
+            for (let i = 0; i < queens.length; i++) {
+                for (let j = i + 1; j < queens.length; j++) {
+                    const q1 = queens[i];
+                    const q2 = queens[j];
+                    if (q1.row === q2.row || q1.col === q2.col ||
+                        Math.abs(q1.row - q2.row) === Math.abs(q1.col - q2.col)) {
+                        valid = false;
+                        break;
+                    }
+                }
+                if (!valid) break;
+            }
+
+            if (queens.length === 4 && valid) {
+                statusMsg.textContent = '✓ Valid solution! All constraints satisfied!';
+                statusMsg.style.color = '#2e7d32';
+                statusMsg.style.fontWeight = 'bold';
+            } else if (!valid) {
+                statusMsg.textContent = '✗ Constraint violation: Queens are attacking each other';
+                statusMsg.style.color = '#c62828';
+                statusMsg.style.fontWeight = 'bold';
+            } else {
+                statusMsg.textContent = 'Place ' + (4 - queens.length) + ' more queen(s)';
+                statusMsg.style.color = '#666';
+            }
+        }
+
+        function resetBoard() {
+            queens.length = 0;
+            const cells = Array.from(chessboard.children);
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('attacked');
+            });
+            document.getElementById('status-message').textContent = '';
+        }
+
+        // Initialize
+        createChessboard();
+    </script>
+</body>
+</html>
